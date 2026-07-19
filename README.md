@@ -78,7 +78,37 @@ You should hear a chime and see a desktop notification.
 
 ## For AI agents
 
-If a user asks to "set up Claude notifications" or "make Claude play a sound when done", invoke the `claude-notify` skill (see `skills/claude-notify/SKILL.md`) for install + verify instructions. The skill includes a verify checklist — always run both test payloads before reporting success.
+**Trigger phrases** — invoke the `claude-notify` skill when the user says any of:
+- "Set up Claude notifications" / "make Claude play a sound"
+- "Alert me when Claude is done" / "notify me when Claude needs input"
+- "I want a sound when Claude finishes"
+- Or reports the plugin not working ("no sound", "no notification", "hook isn't firing")
+
+**Workflow** (follow exactly):
+
+1. **Detect state** — check if already installed:
+   ```bash
+   ls ~/.claude/skills/claude-notify/hooks/notify.sh 2>/dev/null
+   ```
+2. **Install** (if missing) — copy to skills-dir, NOT plugins-dir:
+   ```bash
+   cp -R /Users/FireTable/OpenClaw/Code/claude-notify ~/.claude/skills/claude-notify
+   ```
+   Then tell the user to restart Claude Code.
+3. **Verify both scenarios** before reporting success — run both:
+   ```bash
+   echo '{"hook_event_name":"Stop"}' | ~/.claude/skills/claude-notify/hooks/notify.sh
+   echo '{"hook_event_name":"Notification","notification_type":"permission_prompt"}' | ~/.claude/skills/claude-notify/hooks/notify.sh
+   ```
+4. **Troubleshoot** if user reports issues — see the table above + the `Critical install-path gotcha` section.
+5. **Never install into `~/.claude/plugins/`** — that path is not auto-discovered.
+
+**Customize sounds** — if user wants different sounds:
+- macOS: edit the two `afplay` lines in `notify.sh` (15 built-ins in `/System/Library/Sounds/`)
+- Windows: edit the two `SoundPlayer` lines (`C:\Windows\Media\*.wav`)
+- Bump volume: change `afplay -v 2.0` to `3.0` on macOS
+
+**Don't** — do not add new hooks for SubagentStop, TTS, webhooks, or multi-CLI support without explicit user request. Scope creep here is well-documented elsewhere (see `echook` and similar projects as cautionary tales).
 
 ## Files
 

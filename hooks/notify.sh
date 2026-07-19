@@ -28,7 +28,7 @@ UNAME=$(uname -s)
 
 notify_macos() {
     local sound="$1" title="$2" msg="$3"
-    afplay "$sound" &>/dev/null &
+    afplay -v 2.0 "$sound" &>/dev/null &  # ponytail: 2x volume; bump to 3.0 if still quiet
     osascript -e "display notification \"$msg\" with title \"$title\"" &>/dev/null &
 }
 

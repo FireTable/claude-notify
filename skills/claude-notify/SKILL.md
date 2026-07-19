@@ -83,6 +83,50 @@ On Windows, if toast doesn't show: first run unlocks WinRT — execute once inte
 
 Edit `hooks/notify.sh` directly. The script is ~50 lines, no abstractions. Two sound files to swap, two notification strings to change. After editing, re-`cp` (or switch to symlink).
 
+**Volume**: macOS uses `afplay -v 2.0` (default 1.0, range 0.0–1.0+, max practical ~3.0). Bump the value if still too quiet. Windows SoundPlayer has no per-play volume control; changing system volume is the only lever without P/Invoke.
+
+## AI Agent Workflow
+
+When invoked to handle this plugin, follow this exact sequence:
+
+### 1. Detect
+```bash
+ls ~/.claude/skills/claude-notify/hooks/notify.sh 2>/dev/null && echo "INSTALLED" || echo "MISSING"
+```
+
+### 2. Install (if missing)
+```bash
+cp -R /Users/FireTable/OpenClaw/Code/claude-notify ~/.claude/skills/claude-notify
+```
+Tell user: "Restart Claude Code to activate."
+
+### 3. Verify (always, before reporting success)
+```bash
+echo '{"hook_event_name":"Stop"}' | ~/.claude/skills/claude-notify/hooks/notify.sh
+echo '{"hook_event_name":"Notification","notification_type":"permission_prompt"}' | ~/.claude/skills/claude-notify/hooks/notify.sh
+```
+Both should produce sound + desktop notification.
+
+### 4. Common user complaints → fixes
+
+| User says | Likely cause | Do this |
+|---|---|---|
+| "No sound at all" | Plugin not installed, or in wrong dir | Run step 2; check `~/.claude/skills/` not `~/.claude/plugins/` |
+| "Sound but no popup" | Terminal not authorized | Walk through macOS System Settings → Notifications |
+| "Hook never fires" | Used `~/.claude/plugins/` instead of `~/.claude/skills/` | Move it; explain the gotcha |
+| "Too quiet" | Default volume too low | Bump `afplay -v 2.0` → `3.0` |
+| "Want different sound" | Personal preference | Edit `notify.sh`, re-`cp` |
+| "Want different events" | (e.g. SubagentStop) | Edit `hooks/hooks.json`, add event |
+
+### 5. Do NOT do (without explicit user request)
+
+- Add SubagentStop / PermissionRequest / TTS / webhook / multi-CLI support
+- Install into `~/.claude/plugins/`
+- Wrap the script in a launcher / installer / config UI
+- Move sounds out of the OS built-in set (ships extra ~1MB for marginal quality gain)
+
+These are well-trodden scope-creep paths. The 50-line script does one thing.
+
 ## Unused events (intentional)
 
 We don't register `SubagentStop` (too noisy — fires for every subagent), `PermissionRequest` (covered by `Notification` matcher `permission_prompt`), or `StopFailure` (rare, no clear sound fits). Add them yourself if you want them.
