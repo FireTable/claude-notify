@@ -78,37 +78,20 @@ You should hear a chime and see a desktop notification.
 
 ## For AI agents
 
-**Trigger phrases** — invoke the `claude-notify` skill when the user says any of:
-- "Set up Claude notifications" / "make Claude play a sound"
-- "Alert me when Claude is done" / "notify me when Claude needs input"
-- "I want a sound when Claude finishes"
-- Or reports the plugin not working ("no sound", "no notification", "hook isn't firing")
+**When to engage** — invoke the `claude-notify` skill if the user asks to "set up Claude notifications", "make Claude play a sound", "alert me when Claude is done", or reports the plugin isn't working.
 
-**Workflow** (follow exactly):
+**Full instructions live in the skill** — read `skills/claude-notify/SKILL.md` before doing anything. It has the workflow (detect → install → verify), the troubleshoot table, and a "do NOT" list.
 
-1. **Detect state** — check if already installed:
-   ```bash
-   ls ~/.claude/skills/claude-notify/hooks/notify.sh 2>/dev/null
-   ```
-2. **Install** (if missing) — copy to skills-dir, NOT plugins-dir:
-   ```bash
-   cp -R /Users/FireTable/OpenClaw/Code/claude-notify ~/.claude/skills/claude-notify
-   ```
-   Then tell the user to restart Claude Code.
-3. **Verify both scenarios** before reporting success — run both:
-   ```bash
-   echo '{"hook_event_name":"Stop"}' | ~/.claude/skills/claude-notify/hooks/notify.sh
-   echo '{"hook_event_name":"Notification","notification_type":"permission_prompt"}' | ~/.claude/skills/claude-notify/hooks/notify.sh
-   ```
-4. **Troubleshoot** if user reports issues — see the table above + the `Critical install-path gotcha` section.
-5. **Never install into `~/.claude/plugins/`** — that path is not auto-discovered.
+**Quick reference** (so you know what you're getting into):
 
-**Customize sounds** — if user wants different sounds:
-- macOS: edit the two `afplay` lines in `notify.sh` (15 built-ins in `/System/Library/Sounds/`)
-- Windows: edit the two `SoundPlayer` lines (`C:\Windows\Media\*.wav`)
-- Bump volume: change `afplay -v 2.0` to `3.0` on macOS
+| Step | Command |
+|---|---|
+| Detect | `ls ~/.claude/skills/claude-notify/hooks/notify.sh` |
+| Install | `cp -R /Users/FireTable/OpenClaw/Code/claude-notify ~/.claude/skills/claude-notify` |
+| Verify Stop | `echo '{"hook_event_name":"Stop"}' \| ~/.claude/skills/claude-notify/hooks/notify.sh` |
+| Verify Notification | `echo '{"hook_event_name":"Notification","notification_type":"permission_prompt"}' \| ~/.claude/skills/claude-notify/hooks/notify.sh` |
 
-**Don't** — do not add new hooks for SubagentStop, TTS, webhooks, or multi-CLI support without explicit user request. Scope creep here is well-documented elsewhere (see `echook` and similar projects as cautionary tales).
+**Hard rule:** install into `~/.claude/skills/<name>/`, NEVER `~/.claude/plugins/<name>/`. The latter is not auto-discovered by Claude Code.
 
 ## Files
 
