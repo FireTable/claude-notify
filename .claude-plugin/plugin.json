@@ -1,0 +1,10 @@
+{
+  "name": "claude-notify",
+  "version": "0.1.0",
+  "description": "Play a sound + send an OS notification when Claude Code finishes a task or needs human input. macOS and Windows. Zero dependencies.",
+  "author": {
+    "name": "claude-notify"
+  },
+  "license": "MIT",
+  "keywords": ["hooks", "notification", "sound", "ux"]
+}
