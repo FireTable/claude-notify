@@ -24,6 +24,9 @@ if [[ -z "$SCENARIO" ]]; then
     exit 0
 fi
 
+# Skip when launched from inside Cindy (provider-managed CC session): Cindy already shows its own status, no need to also fire OS notification + sound.
+[[ "${CLAUDE_CODE_PROVIDER_MANAGED_BY_HOST:-0}" == "1" ]] && exit 0
+
 UNAME=$(uname -s)
 
 notify_macos() {
